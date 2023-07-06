@@ -22,12 +22,18 @@ async function usuarioNormalizado(usuarioFirebase: firebase.User): Promise<Usuar
     }
 }
 
-export function AuthProvider(props) {
-    const [usuario, setUsuario] = useState<Usuario>(null)
+export function AuthProvider(props: any) {
+    const [usuario, setUsuario] = useState<Usuario>()
 
     async function loginGoogle() {
-        console.log('Login Google')
-        router.push('/')
+        const resp = await firebase.auth().signInWithPopup(
+            new firebase.auth.GoogleAuthProvider()
+        )
+        if(resp.user?.email) {
+            const usuario = await usuarioNormalizado(resp.user)
+            setUsuario(usuario)
+            router.push('/')
+        }
     }
     return (
         <AuthContext.Provider value={{
