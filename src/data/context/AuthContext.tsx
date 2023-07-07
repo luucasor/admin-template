@@ -7,8 +7,10 @@ import Cookies from 'js-cookie'
 interface AuthContextProps {
     usuario?: Usuario | null
     loginGoogle?: () => Promise<void>
+    logout?: () => Promise<void>
 }
 
+const cookieName = 'admin-template-luucasor-auth'
 const AuthContext = createContext<AuthContextProps>({})
 
 async function usuarioNormalizado(usuarioFirebase: firebase.User): Promise<Usuario> {
@@ -24,7 +26,6 @@ async function usuarioNormalizado(usuarioFirebase: firebase.User): Promise<Usuar
 }
 
 function gerenciarCookie(logado: boolean) {
-    const cookieName = 'admin-template-luucasor-auth'
     if(logado) {
         Cookies.set(cookieName, logado+"", {
             expires: 7
@@ -54,24 +55,41 @@ export function AuthProvider(props: any) {
     }
 
     async function loginGoogle() {
-        const resp = await firebase.auth().signInWithPopup(
-            new firebase.auth.GoogleAuthProvider()
-        )
-        if(resp.user) {
-            configurarSessao(resp.user)
+        try {
+            setCarregando(true)
+            const resp = await firebase.auth().signInWithPopup(
+                new firebase.auth.GoogleAuthProvider()
+            )
+            
+            configurarSessao(resp?.user)
             router.push('/')
+        } finally {
+            setCarregando(false)
+        }
+    }
+
+    async function logout() {
+        try {
+            setCarregando(true)
+            await firebase.auth().signOut()
+            await configurarSessao(null)
+        } finally {
+            setCarregando(false)
         }
     }
 
     useEffect(() => {
-        const cancelar = firebase.auth().onIdTokenChanged(configurarSessao)
-        return () => cancelar()
+        if(Cookies.get(cookieName)) {
+            const cancelar = firebase.auth().onIdTokenChanged(configurarSessao)
+            return () => cancelar()
+        }
     }, [])
 
     return (
         <AuthContext.Provider value={{
             usuario,
-            loginGoogle
+            loginGoogle,
+            logout
         }}>
             {props.children}
         </AuthContext.Provider>
