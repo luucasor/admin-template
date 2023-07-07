@@ -3,6 +3,7 @@ import Image from 'next/image'
 import loading from '@/../public/images/loading.gif'
 import useAuth from '@/data/hook/useAuth'
 import router from 'next/router'
+import { cookieName } from '@/data/context/AuthContext'
 
 export default function ForcarAutenticacao(props: any) {
 
@@ -15,7 +16,7 @@ export default function ForcarAutenticacao(props: any) {
                     <script
                         dangerouslySetInnerHTML={{
                             __html: `
-                                if(!document.cookie?.includes("admin-template-luucasor-auth")) {
+                                if(!document.cookie?.includes(${cookieName})) {
                                     window.location.href = "/autenticacao"
                                 }  
                             `

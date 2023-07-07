@@ -11,7 +11,7 @@ interface AuthContextProps {
     logout?: () => Promise<void>
 }
 
-const cookieName = 'admin-template-luucasor-auth'
+export const cookieName = 'admin-template-luucasor-auth'
 const AuthContext = createContext<AuthContextProps>({})
 
 async function usuarioNormalizado(usuarioFirebase: firebase.User): Promise<Usuario> {
