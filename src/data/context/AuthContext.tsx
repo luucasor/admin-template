@@ -6,6 +6,7 @@ import Cookies from 'js-cookie'
 
 interface AuthContextProps {
     usuario?: Usuario | null
+    carregando?: boolean
     loginGoogle?: () => Promise<void>
     logout?: () => Promise<void>
 }
@@ -82,12 +83,15 @@ export function AuthProvider(props: any) {
         if(Cookies.get(cookieName)) {
             const cancelar = firebase.auth().onIdTokenChanged(configurarSessao)
             return () => cancelar()
+        } else {
+            setCarregando(false)
         }
     }, [])
 
     return (
         <AuthContext.Provider value={{
             usuario,
+            carregando,
             loginGoogle,
             logout
         }}>
